@@ -173,7 +173,7 @@ void setup() {
   stack_reg.setInput(wb);
   stack_reg.setOutput1(adlb);
   stack_reg.setOutput2(rb);
-  stack_reg.setDefaultValue(0xFF);  // Goes top to bottom
+ // stack_reg.setDefaultValue(0xFF);  // Goes top to bottom
   stack_reg.show_decimal = false;
   stack_reg.count_direction.setState(true); // Default to count down
   control_unit.connectComponentControlInput(CW_S_LOAD, stack_reg.load_enable);

@@ -1,5 +1,5 @@
 class Register extends Component {
-  int default_value;
+  //int default_value;
  
   // Registers can have only one input bus but can output to multiple buses
   Bus input_bus;
@@ -13,7 +13,8 @@ class Register extends Component {
   int active_phase;
    
   Register(String name, int active_phase) {
-    default_value = 0;
+  //  default_value = 0;
+    this.value = int(random(255));  // Simulates how a register might actually start up with a random value
     this.display_name = name;
     this.active_phase = active_phase;
       
@@ -29,13 +30,9 @@ class Register extends Component {
   }
  
 
-  void setDefaultValue(int def) {
-      default_value = def;
-  }
-  
-  void reset() {
-    value = default_value;
-  }
+  //void setDefaultValue(int def) {
+  //    default_value = def;
+  //}
   
   void setInput(Bus bus) {
     this.input_bus = bus;
