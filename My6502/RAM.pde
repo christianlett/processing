@@ -149,7 +149,6 @@ class RAM extends Component {
         if(mouse_button == LEFT) {
           breakpoint = addr;
         } else if(mouse_button == RIGHT && addr == breakpoint) {
-          println("here");
           breakpoint = -99;
         }
         

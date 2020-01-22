@@ -27,9 +27,9 @@ class Clock {
   final static int STEP     =  1;
   
   // Clock States
-  final static int STATE_RISING     = 1;  // Low-to-High Transition (Rising Edge)
+  final static int STATE_RISING = 1;  // Low-to-High Transition (Rising Edge)
   final static int STATE_HI     = 2;  // Clock is High
-  final static int STATE_HL     = 3;  // High-to-Low Transition (Falling Edge)
+  final static int STATE_FALLING     = 3;  // High-to-Low Transition (Falling Edge)
   final static int STATE_LO     = 4;  // Clock is Low
  
   Clock(int period, int phases) {
@@ -95,14 +95,14 @@ class Clock {
      // print("-");
       int t = cur_time - clock_pulse_start;
       if(t > clock_high_time) {
-        clock_state = STATE_HL;
+        clock_state = STATE_FALLING;
         
      //  print(active_phase);
      //  print("\\");
       }
       return;
     }
-    if(clock_state == STATE_HL) {
+    if(clock_state == STATE_FALLING) {
       clock_state = STATE_LO;
       clock_pulse_start = millis();
     }

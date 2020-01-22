@@ -23,12 +23,12 @@ class MicroCodeAssembler {
   
   void assemble() {
     // Step 0 of all cu.instructions is the same
-    for(int i=0; i<256; i++) {
-      loadInstructionROM(VER0, i, 0, PHI1, MI_PCL_OUT);
-      loadInstructionROM(VER0, i, 0, PHI1, MI_PCH_OUT);
-      loadInstructionROM(VER0, i, 0, PHI1, MI_IR_LOAD);
-      loadInstructionROM(VER0, i, 0, PHI2, MI_PC_INC);
-    }
+    //for(int i=0; i<256; i++) {
+    //  loadInstructionROM(VER0, i, 0, PHI1, MI_PCL_OUT);
+    //  loadInstructionROM(VER0, i, 0, PHI1, MI_PCH_OUT);
+    //  loadInstructionROM(VER0, i, 0, PHI1, MI_IR_LOAD);
+    //  loadInstructionROM(VER0, i, 0, PHI2, MI_PC_INC);
+    //}
     
     // ADC # (69) - NVZC - 2 cycles
     cu.instructions[0x69].set("ADC", InstructionDef.IMMEDIATE);
@@ -160,34 +160,67 @@ class MicroCodeAssembler {
     cu.instructions[0x79].set("ADC", InstructionDef.ABSOLUTE_Y);
     
     // Version 0 - No carry from LB + Y 
-    loadInstructionROM(VER0, 0x79, 1, PHI1, MI_PCL_OUT);    // Operand 1 (Low Address Byte)
-    loadInstructionROM(VER0, 0x79, 1, PHI1, MI_PCH_OUT);
-    loadInstructionROM(VER0, 0x79, 1, PHI1, MI_ALU_Y_2);    // Load DB into ALU-Y (ALU_Y_2, ALU_Y_3)
-    loadInstructionROM(VER0, 0x79, 1, PHI1, MI_ALU_Y_3);
-    loadInstructionROM(VER0, 0x79, 1, PHI1, MI_Y_OUT);      // Load X into ALU-X (X_OUTPUT, ALU_X_A)
-    loadInstructionROM(VER0, 0x79, 1, PHI1, MI_ALU_X_A);
-    loadInstructionROM(VER0, 0x79, 1, PHI2, MI_ALU_OUT);    // Output the result of DB + X...
-    loadInstructionROM(VER0, 0x79, 1, PHI2, MI_ADL_LOAD);   // and load back into the ADL Register
-    loadInstructionROM(VER0, 0x79, 1, PHI2, MI_PC_INC);
-    loadInstructionROM(VER0, 0x79, 2, PHI1, MI_PCL_OUT);    // Operand 2 (High Address Byte)
-    loadInstructionROM(VER0, 0x79, 2, PHI1, MI_PCH_OUT);
-    loadInstructionROM(VER0, 0x79, 2, PHI1, MI_DB_WB);
-    loadInstructionROM(VER0, 0x79, 2, PHI1, MI_ADH_LOAD);
-    loadInstructionROM(VER0, 0x79, 2, PHI2, MI_ADL_OUT);
-    loadInstructionROM(VER0, 0x79, 2, PHI2, MI_ADH_OUT); 
-    loadInstructionROM(VER0, 0x79, 2, PHI2, MI_A_OUT);
-    loadInstructionROM(VER0, 0x79, 2, PHI2, MI_ALU_X_A);
-    loadInstructionROM(VER0, 0x79, 2, PHI2, MI_ALU_Y_2);  // B input (DB)
-    loadInstructionROM(VER0, 0x79, 2, PHI2, MI_ALU_Y_3);  // B input (DB)
-    loadInstructionROM(VER0, 0x79, 3, PHI1, MI_ALU_OUT);
-    loadInstructionROM(VER0, 0x79, 3, PHI1, MI_P_Z_LOAD);
-    loadInstructionROM(VER0, 0x79, 3, PHI1, MI_P_N_LOAD);
-    loadInstructionROM(VER0, 0x79, 3, PHI1, MI_P_C_LOAD);
-    loadInstructionROM(VER0, 0x79, 3, PHI1, MI_P_V_LOAD);
-    loadInstructionROM(VER0, 0x79, 3, PHI1, MI_P_FROM_ALU);
-    loadInstructionROM(VER0, 0x79, 3, PHI1, MI_A_LOAD);
-    loadInstructionROM(VER0, 0x79, 3, PHI2, MI_PC_INC);
-    loadInstructionROM(VER0, 0x79, 3, PHI2, MI_INST_END);
+    //loadInstructionROM(VER0, 0x79, 1, PHI1, MI_PCL_OUT);    // Operand 1 (Low Address Byte)
+    //loadInstructionROM(VER0, 0x79, 1, PHI1, MI_PCH_OUT);
+    //loadInstructionROM(VER0, 0x79, 1, PHI1, MI_ALU_Y_2);    // Load DB into ALU-Y (ALU_Y_2, ALU_Y_3)
+    //loadInstructionROM(VER0, 0x79, 1, PHI1, MI_ALU_Y_3);
+    //loadInstructionROM(VER0, 0x79, 1, PHI1, MI_Y_OUT);      // Load X into ALU-X (X_OUTPUT, ALU_X_A)
+    //loadInstructionROM(VER0, 0x79, 1, PHI1, MI_ALU_X_A);
+    //loadInstructionROM(VER0, 0x79, 1, PHI2, MI_ALU_OUT);    // Output the result of DB + X...
+    //loadInstructionROM(VER0, 0x79, 1, PHI2, MI_ADL_LOAD);   // and load back into the ADL Register
+    //loadInstructionROM(VER0, 0x79, 1, PHI2, MI_PC_INC);
+    //loadInstructionROM(VER0, 0x79, 2, PHI1, MI_PCL_OUT);    // Operand 2 (High Address Byte)
+    //loadInstructionROM(VER0, 0x79, 2, PHI1, MI_PCH_OUT);
+    //loadInstructionROM(VER0, 0x79, 2, PHI1, MI_DB_WB);
+    //loadInstructionROM(VER0, 0x79, 2, PHI1, MI_ADH_LOAD);
+    //loadInstructionROM(VER0, 0x79, 2, PHI2, MI_ADL_OUT);
+    //loadInstructionROM(VER0, 0x79, 2, PHI2, MI_ADH_OUT); 
+    //loadInstructionROM(VER0, 0x79, 2, PHI2, MI_A_OUT);
+    //loadInstructionROM(VER0, 0x79, 2, PHI2, MI_ALU_X_A);
+    //loadInstructionROM(VER0, 0x79, 2, PHI2, MI_ALU_Y_2);  // B input (DB)
+    //loadInstructionROM(VER0, 0x79, 2, PHI2, MI_ALU_Y_3);  // B input (DB)
+    //loadInstructionROM(VER0, 0x79, 3, PHI1, MI_ALU_OUT);
+    //loadInstructionROM(VER0, 0x79, 3, PHI1, MI_P_Z_LOAD);
+    //loadInstructionROM(VER0, 0x79, 3, PHI1, MI_P_N_LOAD);
+    //loadInstructionROM(VER0, 0x79, 3, PHI1, MI_P_C_LOAD);
+    //loadInstructionROM(VER0, 0x79, 3, PHI1, MI_P_V_LOAD);
+    //loadInstructionROM(VER0, 0x79, 3, PHI1, MI_P_FROM_ALU);
+    //loadInstructionROM(VER0, 0x79, 3, PHI1, MI_A_LOAD);
+    //loadInstructionROM(VER0, 0x79, 3, PHI2, MI_PC_INC);
+    //loadInstructionROM(VER0, 0x79, 3, PHI2, MI_INST_END);
+    
+    loadInstructionROM(VER0, 0x79, 0, PHI1, MI_PC_INC); 
+    loadInstructionROM(VER0, 0x79, 0, PHI2, MI_PCL_OUT);    // Operand 1 (Low Address Byte)
+    loadInstructionROM(VER0, 0x79, 0, PHI2, MI_PCH_OUT);
+    loadInstructionROM(VER0, 0x79, 0, PHI2, MI_ALU_Y_2);    // Load DB into ALU-Y (ALU_Y_2, ALU_Y_3)
+    loadInstructionROM(VER0, 0x79, 0, PHI2, MI_ALU_Y_3);
+    loadInstructionROM(VER0, 0x79, 0, PHI2, MI_Y_OUT);      // Load X into ALU-X (X_OUTPUT, ALU_X_A)
+    loadInstructionROM(VER0, 0x79, 0, PHI2, MI_ALU_X_A);
+    loadInstructionROM(VER0, 0x79, 1, PHI1, MI_ALU_OUT);    // Output the result of DB + X...
+    loadInstructionROM(VER0, 0x79, 1, PHI1, MI_ADL_LOAD);   // and load back into the ADL Register
+    loadInstructionROM(VER0, 0x79, 1, PHI1, MI_PC_INC);
+    loadInstructionROM(VER0, 0x79, 1, PHI2, MI_PCL_OUT);    // Operand 2 (High Address Byte)
+    loadInstructionROM(VER0, 0x79, 1, PHI2, MI_PCH_OUT);
+    loadInstructionROM(VER0, 0x79, 1, PHI2, MI_DB_WB);
+    loadInstructionROM(VER0, 0x79, 1, PHI2, MI_ADH_LOAD);
+    loadInstructionROM(VER0, 0x79, 2, PHI1, MI_ADL_OUT);
+    loadInstructionROM(VER0, 0x79, 2, PHI1, MI_ADH_OUT); 
+    loadInstructionROM(VER0, 0x79, 2, PHI1, MI_A_OUT);
+    loadInstructionROM(VER0, 0x79, 2, PHI1, MI_ALU_X_A);
+    loadInstructionROM(VER0, 0x79, 2, PHI1, MI_ALU_Y_2);  // B input (DB)
+    loadInstructionROM(VER0, 0x79, 2, PHI1, MI_ALU_Y_3);  // B input (DB)
+    loadInstructionROM(VER0, 0x79, 2, PHI2, MI_ALU_OUT);
+    loadInstructionROM(VER0, 0x79, 2, PHI2, MI_P_Z_LOAD);
+    loadInstructionROM(VER0, 0x79, 2, PHI2, MI_P_N_LOAD);
+    loadInstructionROM(VER0, 0x79, 2, PHI2, MI_P_C_LOAD);
+    loadInstructionROM(VER0, 0x79, 2, PHI2, MI_P_V_LOAD);
+    loadInstructionROM(VER0, 0x79, 2, PHI2, MI_P_FROM_ALU);
+    loadInstructionROM(VER0, 0x79, 2, PHI2, MI_A_LOAD);
+    loadInstructionROM(VER0, 0x79, 3, PHI1, MI_PC_INC);
+    loadInstructionROM(VER0, 0x79, 3, PHI2, MI_PCL_OUT);
+    loadInstructionROM(VER0, 0x79, 3, PHI2, MI_PCH_OUT);
+    loadInstructionROM(VER0, 0x79, 3, PHI2, MI_IR_LOAD);
+    
     
     // Version 1 - Carry from LB + Y (Add 1 cycle)
     loadInstructionROM(VER1, 0x79, 1, PHI2, MI_ALU_OUT);    // Output the result of DB + X...
@@ -369,15 +402,25 @@ class MicroCodeAssembler {
     
     // CLC (18) - C=0
     cu.instructions[0x18].set("CLC", InstructionDef.IMPLIED);
-    loadInstructionROM(VER0, 0x18, 1, PHI1, MI_P_C_LOAD);
-    loadInstructionROM(VER0, 0x18, 1, PHI1, MI_P_FROM_IR5);
-    loadInstructionROM(VER0, 0x18, 1, PHI2, MI_INST_END);
+    loadInstructionROM(VER0, 0x18, 0, PHI1, MI_P_C_LOAD);
+    loadInstructionROM(VER0, 0x18, 0, PHI1, MI_P_FROM_IR5);
+    loadInstructionROM(VER0, 0x18, 1, PHI1, MI_PC_INC);
+    loadInstructionROM(VER0, 0x18, 1, PHI2, MI_PCL_OUT);
+    loadInstructionROM(VER0, 0x18, 1, PHI2, MI_PCH_OUT);
+    loadInstructionROM(VER0, 0x18, 1, PHI2, MI_IR_LOAD);
     
     // CLI (58) - I=0
     cu.instructions[0x58].set("CLI", InstructionDef.IMPLIED);
-    loadInstructionROM(VER0, 0x58, 1, PHI1, MI_P_I_LOAD);
-    loadInstructionROM(VER0, 0x58, 1, PHI1, MI_P_FROM_IR5);
-    loadInstructionROM(VER0, 0x58, 1, PHI2, MI_INST_END);
+    //loadInstructionROM(VER0, 0x58, 1, PHI1, MI_P_I_LOAD);
+    //loadInstructionROM(VER0, 0x58, 1, PHI1, MI_P_FROM_IR5);
+    //loadInstructionROM(VER0, 0x58, 1, PHI2, MI_INST_END);
+    
+    loadInstructionROM(VER0, 0x58, 0, PHI1, MI_P_I_LOAD);
+    loadInstructionROM(VER0, 0x58, 0, PHI1, MI_P_FROM_IR5);
+    loadInstructionROM(VER0, 0x58, 1, PHI1, MI_PC_INC);
+    loadInstructionROM(VER0, 0x58, 1, PHI2, MI_PCL_OUT);
+    loadInstructionROM(VER0, 0x58, 1, PHI2, MI_PCH_OUT);
+    loadInstructionROM(VER0, 0x58, 1, PHI2, MI_IR_LOAD);
     
     // CLV (B8) - V=0
     cu.instructions[0xB8].set("CLV", InstructionDef.IMPLIED);
@@ -498,45 +541,89 @@ class MicroCodeAssembler {
        
     // INX (E8) - NZ
     cu.instructions[0xE8].set("INX", InstructionDef.IMPLIED);
-    loadInstructionROM(VER0, 0xE8, 0, PHI2, MI_X_OUT);
-    loadInstructionROM(VER0, 0xE8, 0, PHI2, MI_ALU_X_A);
-    loadInstructionROM(VER0, 0xE8, 0, PHI2, MI_ALU_FORCE_CARRY);
-    loadInstructionROM(VER0, 0xE8, 1, PHI1, MI_ALU_OUT);
-    loadInstructionROM(VER0, 0xE8, 1, PHI1, MI_P_Z_LOAD);
-    loadInstructionROM(VER0, 0xE8, 1, PHI1, MI_P_N_LOAD);
-    loadInstructionROM(VER0, 0xE8, 1, PHI1, MI_P_FROM_ALU);
-    loadInstructionROM(VER0, 0xE8, 1, PHI1, MI_X_LOAD);
-    loadInstructionROM(VER0, 0xE8, 1, PHI2, MI_INST_END);
+    //loadInstructionROM(VER0, 0xE8, 0, PHI2, MI_X_OUT);
+    //loadInstructionROM(VER0, 0xE8, 0, PHI2, MI_ALU_X_A);
+    //loadInstructionROM(VER0, 0xE8, 0, PHI2, MI_ALU_FORCE_CARRY);
+    //loadInstructionROM(VER0, 0xE8, 1, PHI1, MI_ALU_OUT);
+    //loadInstructionROM(VER0, 0xE8, 1, PHI1, MI_P_Z_LOAD);
+    //loadInstructionROM(VER0, 0xE8, 1, PHI1, MI_P_N_LOAD);
+    //loadInstructionROM(VER0, 0xE8, 1, PHI1, MI_P_FROM_ALU);
+    //loadInstructionROM(VER0, 0xE8, 1, PHI1, MI_X_LOAD);
+    //loadInstructionROM(VER0, 0xE8, 1, PHI2, MI_INST_END);
+    
+    loadInstructionROM(VER0, 0xE8, 0, PHI1, MI_X_OUT);
+    loadInstructionROM(VER0, 0xE8, 0, PHI1, MI_ALU_X_A);
+    loadInstructionROM(VER0, 0xE8, 0, PHI1, MI_ALU_FORCE_CARRY);
+    loadInstructionROM(VER0, 0xE8, 0, PHI2, MI_ALU_OUT);
+    loadInstructionROM(VER0, 0xE8, 0, PHI2, MI_P_Z_LOAD);
+    loadInstructionROM(VER0, 0xE8, 0, PHI2, MI_P_N_LOAD);
+    loadInstructionROM(VER0, 0xE8, 0, PHI2, MI_P_FROM_ALU);
+    loadInstructionROM(VER0, 0xE8, 0, PHI2, MI_X_LOAD);
+    loadInstructionROM(VER0, 0xE8, 1, PHI1, MI_PC_INC);
+    loadInstructionROM(VER0, 0xE8, 1, PHI2, MI_PCL_OUT);
+    loadInstructionROM(VER0, 0xE8, 1, PHI2, MI_PCH_OUT);
+    loadInstructionROM(VER0, 0xE8, 1, PHI2, MI_IR_LOAD);
     
     // INY (C8) - NZ
     cu.instructions[0xC8].set("INY", InstructionDef.IMPLIED);
-    loadInstructionROM(VER0, 0xC8, 0, PHI2, MI_Y_OUT);
-    loadInstructionROM(VER0, 0xC8, 0, PHI2, MI_ALU_X_A);
-    loadInstructionROM(VER0, 0xC8, 0, PHI2, MI_ALU_FORCE_CARRY);
-    loadInstructionROM(VER0, 0xC8, 1, PHI1, MI_ALU_OUT);
-    loadInstructionROM(VER0, 0xC8, 1, PHI1, MI_P_Z_LOAD);
-    loadInstructionROM(VER0, 0xC8, 1, PHI1, MI_P_N_LOAD);
-    loadInstructionROM(VER0, 0xC8, 1, PHI1, MI_P_FROM_ALU);
-    loadInstructionROM(VER0, 0xC8, 1, PHI1, MI_Y_LOAD);
-    loadInstructionROM(VER0, 0xC8, 1, PHI2, MI_INST_END);
+    //loadInstructionROM(VER0, 0xC8, 0, PHI2, MI_Y_OUT);
+    //loadInstructionROM(VER0, 0xC8, 0, PHI2, MI_ALU_X_A);
+    //loadInstructionROM(VER0, 0xC8, 0, PHI2, MI_ALU_FORCE_CARRY);
+    //loadInstructionROM(VER0, 0xC8, 1, PHI1, MI_ALU_OUT);
+    //loadInstructionROM(VER0, 0xC8, 1, PHI1, MI_P_Z_LOAD);
+    //loadInstructionROM(VER0, 0xC8, 1, PHI1, MI_P_N_LOAD);
+    //loadInstructionROM(VER0, 0xC8, 1, PHI1, MI_P_FROM_ALU);
+    //loadInstructionROM(VER0, 0xC8, 1, PHI1, MI_Y_LOAD);
+    //loadInstructionROM(VER0, 0xC8, 1, PHI2, MI_INST_END);
+    
+    loadInstructionROM(VER0, 0xC8, 0, PHI1, MI_Y_OUT);
+    loadInstructionROM(VER0, 0xC8, 0, PHI1, MI_ALU_X_A);
+    loadInstructionROM(VER0, 0xC8, 0, PHI1, MI_ALU_FORCE_CARRY);
+    loadInstructionROM(VER0, 0xC8, 0, PHI2, MI_ALU_OUT);
+    loadInstructionROM(VER0, 0xC8, 0, PHI2, MI_P_Z_LOAD);
+    loadInstructionROM(VER0, 0xC8, 0, PHI2, MI_P_N_LOAD);
+    loadInstructionROM(VER0, 0xC8, 0, PHI2, MI_P_FROM_ALU);
+    loadInstructionROM(VER0, 0xC8, 0, PHI2, MI_Y_LOAD);
+    loadInstructionROM(VER0, 0xC8, 1, PHI1, MI_PC_INC);
+    loadInstructionROM(VER0, 0xC8, 1, PHI2, MI_PCL_OUT);
+    loadInstructionROM(VER0, 0xC8, 1, PHI2, MI_PCH_OUT);
+    loadInstructionROM(VER0, 0xC8, 1, PHI2, MI_IR_LOAD);
     
     
     // JMP abs (4c) - 3 cycles
     cu.instructions[0x4c].set("JMP", InstructionDef.ABSOLUTE);
-    loadInstructionROM(VER0, 0x4c, 1, PHI1, MI_PCL_OUT);
-    loadInstructionROM(VER0, 0x4c, 1, PHI1, MI_PCH_OUT);
-    loadInstructionROM(VER0, 0x4c, 1, PHI1, MI_DB_WB);
-    loadInstructionROM(VER0, 0x4c, 1, PHI1, MI_T_LOAD);    // Load low byte of jump address into T register
-    loadInstructionROM(VER0, 0x4c, 1, PHI2, MI_PC_INC);
-    loadInstructionROM(VER0, 0x4c, 2, PHI1, MI_PCL_OUT);
-    loadInstructionROM(VER0, 0x4c, 2, PHI1, MI_PCH_OUT);
-    loadInstructionROM(VER0, 0x4c, 2, PHI1, MI_ALU_X_B);    // Load high byte of jump address into ALU's latch
-    loadInstructionROM(VER0, 0x4c, 2, PHI2, MI_ALU_OUT);
-    loadInstructionROM(VER0, 0x4c, 2, PHI2, MI_PCH_LOAD);    
-    loadInstructionROM(VER0, 0x4c, 3, PHI1, MI_T_OUT);
-    loadInstructionROM(VER0, 0x4c, 3, PHI1, MI_RB_WB);
-    loadInstructionROM(VER0, 0x4c, 3, PHI1, MI_PCL_LOAD);
-    loadInstructionROM(VER0, 0x4c, 3, PHI2, MI_INST_END);
+    //loadInstructionROM(VER0, 0x4c, 1, PHI1, MI_PCL_OUT);
+    //loadInstructionROM(VER0, 0x4c, 1, PHI1, MI_PCH_OUT);
+    //loadInstructionROM(VER0, 0x4c, 1, PHI1, MI_DB_WB);
+    //loadInstructionROM(VER0, 0x4c, 1, PHI1, MI_T_LOAD);    // Load low byte of jump address into T register
+    //loadInstructionROM(VER0, 0x4c, 1, PHI2, MI_PC_INC);
+    //loadInstructionROM(VER0, 0x4c, 2, PHI1, MI_PCL_OUT);
+    //loadInstructionROM(VER0, 0x4c, 2, PHI1, MI_PCH_OUT);
+    //loadInstructionROM(VER0, 0x4c, 2, PHI1, MI_ALU_X_B);    // Load high byte of jump address into ALU's latch
+    //loadInstructionROM(VER0, 0x4c, 2, PHI2, MI_ALU_OUT);
+    //loadInstructionROM(VER0, 0x4c, 2, PHI2, MI_PCH_LOAD);    
+    //loadInstructionROM(VER0, 0x4c, 3, PHI1, MI_T_OUT);
+    //loadInstructionROM(VER0, 0x4c, 3, PHI1, MI_RB_WB);
+    //loadInstructionROM(VER0, 0x4c, 3, PHI1, MI_PCL_LOAD);
+    //loadInstructionROM(VER0, 0x4c, 3, PHI2, MI_INST_END);
+    
+    loadInstructionROM(VER0, 0x4c, 0, PHI1, MI_PC_INC);
+    loadInstructionROM(VER0, 0x4c, 0, PHI2, MI_PCL_OUT);
+    loadInstructionROM(VER0, 0x4c, 0, PHI2, MI_PCH_OUT);
+    loadInstructionROM(VER0, 0x4c, 0, PHI2, MI_DB_WB);
+    loadInstructionROM(VER0, 0x4c, 0, PHI2, MI_T_LOAD);    // Load low byte of jump address into T register
+    loadInstructionROM(VER0, 0x4c, 1, PHI1, MI_PC_INC);
+    loadInstructionROM(VER0, 0x4c, 1, PHI2, MI_PCL_OUT);
+    loadInstructionROM(VER0, 0x4c, 1, PHI2, MI_PCH_OUT);
+    loadInstructionROM(VER0, 0x4c, 1, PHI2, MI_ALU_X_B);    // Load high byte of jump address into ALU's latch
+    loadInstructionROM(VER0, 0x4c, 2, PHI1, MI_ALU_OUT);
+    loadInstructionROM(VER0, 0x4c, 2, PHI1, MI_PCH_LOAD);    
+    loadInstructionROM(VER0, 0x4c, 2, PHI2, MI_T_OUT);
+    loadInstructionROM(VER0, 0x4c, 2, PHI2, MI_RB_WB);
+    loadInstructionROM(VER0, 0x4c, 2, PHI2, MI_PCL_LOAD);
+    loadInstructionROM(VER0, 0x4c, 3, PHI2, MI_PCL_OUT);
+    loadInstructionROM(VER0, 0x4c, 3, PHI2, MI_PCH_OUT);
+    loadInstructionROM(VER0, 0x4c, 3, PHI2, MI_IR_LOAD);
     
     
     // JSR (20) - 6 cycles
@@ -582,15 +669,28 @@ class MicroCodeAssembler {
    
     // LDA # (A9) - NZ
     cu.instructions[0xA9].set("LDA", InstructionDef.IMMEDIATE);
-    loadInstructionROM(VER0, 0xA9, 1, PHI1, MI_PCL_OUT);
-    loadInstructionROM(VER0, 0xA9, 1, PHI1, MI_PCH_OUT);
-    loadInstructionROM(VER0, 0xA9, 1, PHI1, MI_DB_WB);
-    loadInstructionROM(VER0, 0xA9, 1, PHI1, MI_P_Z_LOAD);
-    loadInstructionROM(VER0, 0xA9, 1, PHI1, MI_P_N_LOAD);
-    loadInstructionROM(VER0, 0xA9, 1, PHI1, MI_P_FROM_ALU);
-    loadInstructionROM(VER0, 0xA9, 1, PHI1, MI_A_LOAD);
-    loadInstructionROM(VER0, 0xA9, 1, PHI2, MI_PC_INC);
-    loadInstructionROM(VER0, 0xA9, 1, PHI2, MI_INST_END);
+    //loadInstructionROM(VER0, 0xA9, 1, PHI1, MI_PCL_OUT);
+    //loadInstructionROM(VER0, 0xA9, 1, PHI1, MI_PCH_OUT);
+    //loadInstructionROM(VER0, 0xA9, 1, PHI1, MI_DB_WB);
+    //loadInstructionROM(VER0, 0xA9, 1, PHI1, MI_P_Z_LOAD);
+    //loadInstructionROM(VER0, 0xA9, 1, PHI1, MI_P_N_LOAD);
+    //loadInstructionROM(VER0, 0xA9, 1, PHI1, MI_P_FROM_ALU);
+    //loadInstructionROM(VER0, 0xA9, 1, PHI1, MI_A_LOAD);
+    //loadInstructionROM(VER0, 0xA9, 1, PHI2, MI_PC_INC);
+    //loadInstructionROM(VER0, 0xA9, 1, PHI2, MI_INST_END);
+    
+    loadInstructionROM(VER0, 0xA9, 0, PHI1, MI_PC_INC);
+    loadInstructionROM(VER0, 0xA9, 0, PHI2, MI_PCL_OUT);
+    loadInstructionROM(VER0, 0xA9, 0, PHI2, MI_PCH_OUT);
+    loadInstructionROM(VER0, 0xA9, 0, PHI2, MI_DB_WB);
+    loadInstructionROM(VER0, 0xA9, 0, PHI2, MI_P_Z_LOAD);
+    loadInstructionROM(VER0, 0xA9, 0, PHI2, MI_P_N_LOAD);
+    loadInstructionROM(VER0, 0xA9, 0, PHI2, MI_P_FROM_ALU);
+    loadInstructionROM(VER0, 0xA9, 0, PHI2, MI_A_LOAD);
+    loadInstructionROM(VER0, 0xA9, 1, PHI1, MI_PC_INC);
+    loadInstructionROM(VER0, 0xA9, 1, PHI2, MI_PCL_OUT);
+    loadInstructionROM(VER0, 0xA9, 1, PHI2, MI_PCH_OUT);
+    loadInstructionROM(VER0, 0xA9, 1, PHI2, MI_IR_LOAD);
   
     // LDA abs (AD) - NZ
     cu.instructions[0xAD].set("LDA", InstructionDef.ABSOLUTE);
@@ -815,15 +915,28 @@ class MicroCodeAssembler {
     
     // LDX # (A2) - NZ
     cu.instructions[0xA2].set("LDX", InstructionDef.IMMEDIATE);
-    loadInstructionROM(VER0, 0xA2, 1, PHI1, MI_PCL_OUT);
-    loadInstructionROM(VER0, 0xA2, 1, PHI1, MI_PCH_OUT);
-    loadInstructionROM(VER0, 0xA2, 1, PHI1, MI_DB_WB);
-    loadInstructionROM(VER0, 0xA2, 1, PHI1, MI_P_Z_LOAD);
-    loadInstructionROM(VER0, 0xA2, 1, PHI1, MI_P_N_LOAD);
-    loadInstructionROM(VER0, 0xA2, 1, PHI1, MI_P_FROM_ALU);
-    loadInstructionROM(VER0, 0xA2, 1, PHI1, MI_X_LOAD);
-    loadInstructionROM(VER0, 0xA2, 1, PHI2, MI_PC_INC);
-    loadInstructionROM(VER0, 0xA2, 1, PHI2, MI_INST_END);
+    //loadInstructionROM(VER0, 0xA2, 1, PHI1, MI_PCL_OUT);
+    //loadInstructionROM(VER0, 0xA2, 1, PHI1, MI_PCH_OUT);
+    //loadInstructionROM(VER0, 0xA2, 1, PHI1, MI_DB_WB);
+    //loadInstructionROM(VER0, 0xA2, 1, PHI1, MI_P_Z_LOAD);
+    //loadInstructionROM(VER0, 0xA2, 1, PHI1, MI_P_N_LOAD);
+    //loadInstructionROM(VER0, 0xA2, 1, PHI1, MI_P_FROM_ALU);
+    //loadInstructionROM(VER0, 0xA2, 1, PHI1, MI_X_LOAD);
+    //loadInstructionROM(VER0, 0xA2, 1, PHI2, MI_PC_INC);
+    //loadInstructionROM(VER0, 0xA2, 1, PHI2, MI_INST_END);
+    
+    loadInstructionROM(VER0, 0xA2, 0, PHI1, MI_PC_INC);
+    loadInstructionROM(VER0, 0xA2, 0, PHI2, MI_PCL_OUT);
+    loadInstructionROM(VER0, 0xA2, 0, PHI2, MI_PCH_OUT);
+    loadInstructionROM(VER0, 0xA2, 0, PHI2, MI_DB_WB);
+    loadInstructionROM(VER0, 0xA2, 0, PHI2, MI_P_Z_LOAD);
+    loadInstructionROM(VER0, 0xA2, 0, PHI2, MI_P_N_LOAD);
+    loadInstructionROM(VER0, 0xA2, 0, PHI2, MI_P_FROM_ALU);
+    loadInstructionROM(VER0, 0xA2, 0, PHI2, MI_X_LOAD);
+    loadInstructionROM(VER0, 0xA2, 1, PHI1, MI_PC_INC);
+    loadInstructionROM(VER0, 0xA2, 1, PHI2, MI_PCL_OUT);
+    loadInstructionROM(VER0, 0xA2, 1, PHI2, MI_PCH_OUT);
+    loadInstructionROM(VER0, 0xA2, 1, PHI2, MI_IR_LOAD);
     
     // LDX zpg (A6) - NZ
     cu.instructions[0xA6].set("LDX", InstructionDef.ZERO_PAGE);
@@ -843,15 +956,28 @@ class MicroCodeAssembler {
     
     // LDY # (A0) - NZ
     cu.instructions[0xA0].set("LDY", InstructionDef.IMMEDIATE);
-    loadInstructionROM(VER0, 0xA0, 1, PHI1, MI_PCL_OUT);
-    loadInstructionROM(VER0, 0xA0, 1, PHI1, MI_PCH_OUT);
-    loadInstructionROM(VER0, 0xA0, 1, PHI1, MI_DB_WB);
-    loadInstructionROM(VER0, 0xA0, 1, PHI1, MI_P_Z_LOAD);
-    loadInstructionROM(VER0, 0xA0, 1, PHI1, MI_P_N_LOAD);
-    loadInstructionROM(VER0, 0xA0, 1, PHI1, MI_P_FROM_ALU);
-    loadInstructionROM(VER0, 0xA0, 1, PHI1, MI_Y_LOAD);
-    loadInstructionROM(VER0, 0xA0, 1, PHI2, MI_PC_INC);
-    loadInstructionROM(VER0, 0xA0, 1, PHI2, MI_INST_END);
+    //loadInstructionROM(VER0, 0xA0, 1, PHI1, MI_PCL_OUT);
+    //loadInstructionROM(VER0, 0xA0, 1, PHI1, MI_PCH_OUT);
+    //loadInstructionROM(VER0, 0xA0, 1, PHI1, MI_DB_WB);
+    //loadInstructionROM(VER0, 0xA0, 1, PHI1, MI_P_Z_LOAD);
+    //loadInstructionROM(VER0, 0xA0, 1, PHI1, MI_P_N_LOAD);
+    //loadInstructionROM(VER0, 0xA0, 1, PHI1, MI_P_FROM_ALU);
+    //loadInstructionROM(VER0, 0xA0, 1, PHI1, MI_Y_LOAD);
+    //loadInstructionROM(VER0, 0xA0, 1, PHI2, MI_PC_INC);
+    //loadInstructionROM(VER0, 0xA0, 1, PHI2, MI_INST_END);
+    
+    loadInstructionROM(VER0, 0xA0, 0, PHI1, MI_PC_INC);
+    loadInstructionROM(VER0, 0xA0, 0, PHI2, MI_PCL_OUT);
+    loadInstructionROM(VER0, 0xA0, 0, PHI2, MI_PCH_OUT);
+    loadInstructionROM(VER0, 0xA0, 0, PHI2, MI_DB_WB);
+    loadInstructionROM(VER0, 0xA0, 0, PHI2, MI_P_Z_LOAD);
+    loadInstructionROM(VER0, 0xA0, 0, PHI2, MI_P_N_LOAD);
+    loadInstructionROM(VER0, 0xA0, 0, PHI2, MI_P_FROM_ALU);
+    loadInstructionROM(VER0, 0xA0, 0, PHI2, MI_Y_LOAD);
+    loadInstructionROM(VER0, 0xA0, 1, PHI1, MI_PC_INC);
+    loadInstructionROM(VER0, 0xA0, 1, PHI2, MI_PCL_OUT);
+    loadInstructionROM(VER0, 0xA0, 1, PHI2, MI_PCH_OUT);
+    loadInstructionROM(VER0, 0xA0, 1, PHI2, MI_IR_LOAD);
     
     // LSR A (4A) - NZC - 2 cycles
     cu.instructions[0x4A].set("LSR A", InstructionDef.IMPLIED);
@@ -868,7 +994,11 @@ class MicroCodeAssembler {
     
     // NOP (EA) - 2 cycles
     cu.instructions[0xEA].set("NOP", InstructionDef.IMPLIED);
-    loadInstructionROM(VER0, 0xEA, 1, PHI2, MI_INST_END);
+  //  loadInstructionROM(VER0, 0xEA, 1, PHI2, MI_INST_END);
+    loadInstructionROM(VER0, 0xEA, 0, PHI1, MI_PCL_OUT);
+    loadInstructionROM(VER0, 0xEA, 0, PHI1, MI_PCH_OUT);
+    loadInstructionROM(VER0, 0xEA, 0, PHI1, MI_IR_LOAD);
+    loadInstructionROM(VER0, 0xEA, 0, PHI2, MI_PC_INC);
     
     // ORA # (09) - NZ - 2 cycles
     cu.instructions[0x09].set("ORA", InstructionDef.IMMEDIATE);
@@ -1023,47 +1153,88 @@ class MicroCodeAssembler {
     loadInstructionROM(VER0, 0x85, 2, PHI2, MI_INST_END);
     
     // STA abs (8D) - 4 cycles
+    
+    /*
+    loadInstructionROM(VER0, 0xA9, 0, PHI1, MI_PC_INC);
+    loadInstructionROM(VER0, 0xA9, 0, PHI2, MI_PCL_OUT);
+    loadInstructionROM(VER0, 0xA9, 0, PHI2, MI_PCH_OUT);
+    loadInstructionROM(VER0, 0xA9, 0, PHI2, MI_DB_WB);
+    loadInstructionROM(VER0, 0xA9, 0, PHI2, MI_P_Z_LOAD);
+    loadInstructionROM(VER0, 0xA9, 0, PHI2, MI_P_N_LOAD);
+    loadInstructionROM(VER0, 0xA9, 0, PHI2, MI_P_FROM_ALU);
+    loadInstructionROM(VER0, 0xA9, 0, PHI2, MI_A_LOAD);
+    loadInstructionROM(VER0, 0xA9, 1, PHI1, MI_PC_INC);
+    loadInstructionROM(VER0, 0xA9, 1, PHI2, MI_PCL_OUT);
+    loadInstructionROM(VER0, 0xA9, 1, PHI2, MI_PCH_OUT);
+    loadInstructionROM(VER0, 0xA9, 1, PHI2, MI_IR_LOAD);
+    */
+    
     cu.instructions[0x8D].set("STA", InstructionDef.ABSOLUTE);
-    loadInstructionROM(VER0, 0x8D, 1, PHI1, MI_PCL_OUT);
-    loadInstructionROM(VER0, 0x8D, 1, PHI1, MI_PCH_OUT);
-    loadInstructionROM(VER0, 0x8D, 1, PHI1, MI_DB_WB);
-    loadInstructionROM(VER0, 0x8D, 1, PHI1, MI_ADL_LOAD);
-    loadInstructionROM(VER0, 0x8D, 1, PHI2, MI_PC_INC);
-    loadInstructionROM(VER0, 0x8D, 2, PHI1, MI_PCL_OUT);
-    loadInstructionROM(VER0, 0x8D, 2, PHI1, MI_PCH_OUT);
-    loadInstructionROM(VER0, 0x8D, 2, PHI1, MI_DB_WB);
-    loadInstructionROM(VER0, 0x8D, 2, PHI1, MI_ADH_LOAD);
-    loadInstructionROM(VER0, 0x8D, 2, PHI2, MI_PC_INC);
-    loadInstructionROM(VER0, 0x8D, 3, PHI1, MI_ADL_OUT);
-    loadInstructionROM(VER0, 0x8D, 3, PHI1, MI_ADH_OUT);
-    loadInstructionROM(VER0, 0x8D, 3, PHI1, MI_A_OUT);
-    loadInstructionROM(VER0, 0x8D, 3, PHI1, MI_RB_DB);
-    loadInstructionROM(VER0, 0x8D, 3, PHI2, MI_INST_END);
+    loadInstructionROM(VER0, 0x8D, 0, PHI1, MI_PC_INC);
+    loadInstructionROM(VER0, 0x8D, 0, PHI2, MI_PCL_OUT);
+    loadInstructionROM(VER0, 0x8D, 0, PHI2, MI_PCH_OUT);
+    loadInstructionROM(VER0, 0x8D, 0, PHI2, MI_DB_WB);
+    loadInstructionROM(VER0, 0x8D, 0, PHI2, MI_ADL_LOAD);
+    loadInstructionROM(VER0, 0x8D, 1, PHI1, MI_PC_INC);
+    loadInstructionROM(VER0, 0x8D, 1, PHI2, MI_PCL_OUT);
+    loadInstructionROM(VER0, 0x8D, 1, PHI2, MI_PCH_OUT);
+    loadInstructionROM(VER0, 0x8D, 1, PHI2, MI_DB_WB);
+    loadInstructionROM(VER0, 0x8D, 1, PHI2, MI_ADH_LOAD);
+    loadInstructionROM(VER0, 0x8D, 2, PHI1, MI_PC_INC);
+    loadInstructionROM(VER0, 0x8D, 2, PHI2, MI_ADL_OUT);
+    loadInstructionROM(VER0, 0x8D, 2, PHI2, MI_ADH_OUT);
+    loadInstructionROM(VER0, 0x8D, 2, PHI2, MI_A_OUT);
+    loadInstructionROM(VER0, 0x8D, 2, PHI2, MI_RB_DB);
+    loadInstructionROM(VER0, 0x8D, 3, PHI2, MI_PCL_OUT);
+    loadInstructionROM(VER0, 0x8D, 3, PHI2, MI_PCH_OUT);
+    loadInstructionROM(VER0, 0x8D, 3, PHI2, MI_IR_LOAD);
     
     // STA abs, X (9D) - 5 cycles
     cu.instructions[0x9D].set("STA", InstructionDef.ABSOLUTE_X);
     
     // Version 0 - No carry from LB + X 
-    loadInstructionROM(VER0, 0x9D, 1, PHI1, MI_PCL_OUT);    // Operand 1 (Low Address Byte)
-    loadInstructionROM(VER0, 0x9D, 1, PHI1, MI_PCH_OUT);
-    loadInstructionROM(VER0, 0x9D, 1, PHI1, MI_ALU_Y_2);    // Load DB into ALU-Y (ALU_Y_2, ALU_Y_3)
-    loadInstructionROM(VER0, 0x9D, 1, PHI1, MI_ALU_Y_3);
-    loadInstructionROM(VER0, 0x9D, 1, PHI1, MI_X_OUT);      // Load X into ALU-X (X_OUTPUT, ALU_X_A)
-    loadInstructionROM(VER0, 0x9D, 1, PHI1, MI_ALU_X_A);
-    loadInstructionROM(VER0, 0x9D, 1, PHI2, MI_ALU_OUT);    // Output the result of DB + X...
-    loadInstructionROM(VER0, 0x9D, 1, PHI2, MI_ADL_LOAD);   // and load back into the ADL Register
-    loadInstructionROM(VER0, 0x9D, 1, PHI2, MI_PC_INC);
-    loadInstructionROM(VER0, 0x9D, 2, PHI1, MI_PCL_OUT);    // Operand 2 (High Address Byte)
-    loadInstructionROM(VER0, 0x9D, 2, PHI1, MI_PCH_OUT);
-    loadInstructionROM(VER0, 0x9D, 2, PHI1, MI_DB_WB);
-    loadInstructionROM(VER0, 0x9D, 2, PHI1, MI_ADH_LOAD);
-    loadInstructionROM(VER0, 0x9D, 2, PHI2, MI_ADL_OUT);
-    loadInstructionROM(VER0, 0x9D, 2, PHI2, MI_ADH_OUT); 
-    //loadInstructionROM(VER0, 0x9D, 2, PHI2, MI_DB_WB);
-    loadInstructionROM(VER0, 0x9D, 2, PHI2, MI_A_OUT);
-    loadInstructionROM(VER0, 0x9D, 2, PHI2, MI_RB_DB);
-    loadInstructionROM(VER0, 0x9D, 3, PHI1, MI_PC_INC);
-    loadInstructionROM(VER0, 0x9D, 4, PHI2, MI_INST_END);
+    //loadInstructionROM(VER0, 0x9D, 1, PHI1, MI_PCL_OUT);    // Operand 1 (Low Address Byte)
+    //loadInstructionROM(VER0, 0x9D, 1, PHI1, MI_PCH_OUT);
+    //loadInstructionROM(VER0, 0x9D, 1, PHI1, MI_ALU_Y_2);    // Load DB into ALU-Y (ALU_Y_2, ALU_Y_3)
+    //loadInstructionROM(VER0, 0x9D, 1, PHI1, MI_ALU_Y_3);
+    //loadInstructionROM(VER0, 0x9D, 1, PHI1, MI_X_OUT);      // Load X into ALU-X (X_OUTPUT, ALU_X_A)
+    //loadInstructionROM(VER0, 0x9D, 1, PHI1, MI_ALU_X_A);
+    //loadInstructionROM(VER0, 0x9D, 1, PHI2, MI_ALU_OUT);    // Output the result of DB + X...
+    //loadInstructionROM(VER0, 0x9D, 1, PHI2, MI_ADL_LOAD);   // and load back into the ADL Register
+    //loadInstructionROM(VER0, 0x9D, 1, PHI2, MI_PC_INC);
+    //loadInstructionROM(VER0, 0x9D, 2, PHI1, MI_PCL_OUT);    // Operand 2 (High Address Byte)
+    //loadInstructionROM(VER0, 0x9D, 2, PHI1, MI_PCH_OUT);
+    //loadInstructionROM(VER0, 0x9D, 2, PHI1, MI_DB_WB);
+    //loadInstructionROM(VER0, 0x9D, 2, PHI1, MI_ADH_LOAD);
+    //loadInstructionROM(VER0, 0x9D, 2, PHI2, MI_ADL_OUT);
+    //loadInstructionROM(VER0, 0x9D, 2, PHI2, MI_ADH_OUT); 
+    //loadInstructionROM(VER0, 0x9D, 2, PHI2, MI_A_OUT);
+    //loadInstructionROM(VER0, 0x9D, 2, PHI2, MI_RB_DB);
+    //loadInstructionROM(VER0, 0x9D, 3, PHI1, MI_PC_INC);
+    //loadInstructionROM(VER0, 0x9D, 4, PHI2, MI_INST_END);
+    
+    loadInstructionROM(VER0, 0x9D, 0, PHI1, MI_PC_INC);
+    loadInstructionROM(VER0, 0x9D, 0, PHI2, MI_PCL_OUT);    // Operand 1 (Low Address Byte)
+    loadInstructionROM(VER0, 0x9D, 0, PHI2, MI_PCH_OUT);
+    loadInstructionROM(VER0, 0x9D, 0, PHI2, MI_ALU_Y_2);    // Load DB into ALU-Y (ALU_Y_2, ALU_Y_3)
+    loadInstructionROM(VER0, 0x9D, 0, PHI2, MI_ALU_Y_3);
+    loadInstructionROM(VER0, 0x9D, 0, PHI2, MI_X_OUT);      // Load X into ALU-X (X_OUTPUT, ALU_X_A)
+    loadInstructionROM(VER0, 0x9D, 0, PHI2, MI_ALU_X_A);
+    loadInstructionROM(VER0, 0x9D, 1, PHI1, MI_ALU_OUT);    // Output the result of DB + X...
+    loadInstructionROM(VER0, 0x9D, 1, PHI1, MI_ADL_LOAD);   // and load back into the ADL Register
+    loadInstructionROM(VER0, 0x9D, 1, PHI1, MI_PC_INC);
+    loadInstructionROM(VER0, 0x9D, 1, PHI2, MI_PCL_OUT);    // Operand 2 (High Address Byte)
+    loadInstructionROM(VER0, 0x9D, 1, PHI2, MI_PCH_OUT);
+    loadInstructionROM(VER0, 0x9D, 1, PHI2, MI_DB_WB);
+    loadInstructionROM(VER0, 0x9D, 1, PHI2, MI_ADH_LOAD);
+    loadInstructionROM(VER0, 0x9D, 2, PHI1, MI_ADL_OUT);
+    loadInstructionROM(VER0, 0x9D, 2, PHI1, MI_ADH_OUT); 
+    loadInstructionROM(VER0, 0x9D, 2, PHI1, MI_A_OUT);
+    loadInstructionROM(VER0, 0x9D, 2, PHI1, MI_RB_DB);
+    loadInstructionROM(VER0, 0x9D, 4, PHI1, MI_PC_INC);
+    loadInstructionROM(VER0, 0x9D, 4, PHI2, MI_PCL_OUT);
+    loadInstructionROM(VER0, 0x9D, 4, PHI2, MI_PCH_OUT);
+    loadInstructionROM(VER0, 0x9D, 4, PHI2, MI_IR_LOAD);
     
     // Version 1 - Carry from LB + X
     loadInstructionROM(VER1, 0x9D, 1, PHI2, MI_ALU_OUT);    // Output the result of DB + X...

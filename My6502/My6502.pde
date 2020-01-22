@@ -104,6 +104,11 @@ void setup() {
   // 01 - Fibonacci Sequence
   ram.data[0x1000] = 0xA9;  // LDA # (A9);
   ram.data[0x1001] = 0x00;
+  //ram.data[0x1002] = 0xA9;  // LDA # (A9);
+  //ram.data[0x1003] = 0x10;
+  //ram.data[0x1004] = 0xA9;  // LDA # (A9);
+  //ram.data[0x1005] = 0xFF;
+  
   ram.data[0x1002] = 0x8D;  // STA abs
   ram.data[0x1003] = 0x00;
   ram.data[0x1004] = 0x20;  // 0x2000
@@ -111,7 +116,7 @@ void setup() {
   ram.data[0x1006] = 0x01;
   ram.data[0x1007] = 0x8D;  // STA abs
   ram.data[0x1008] = 0x01;
-  ram.data[0x1009] = 0x20;  // 0x2000
+  ram.data[0x1009] = 0x20;  // 0x2001
   ram.data[0x100A] = 0xA2;  // LDX # (A2);
   ram.data[0x100B] = 0x01;  // 0x01
   ram.data[0x100C] = 0xA0;  // LDY # (A0);
@@ -119,7 +124,7 @@ void setup() {
   ram.data[0x100E] = 0x18;  // CLC
   ram.data[0x100F] = 0x79;  // ADC abs, Y
   ram.data[0x1010] = 0x00;  
-  ram.data[0x1011] = 0x20;  // 0x2000 + x
+  ram.data[0x1011] = 0x20;  // 0x2000 + Y
   ram.data[0x1012] = 0xE8;  // INX
   ram.data[0x1013] = 0x9D;  // STA abs, X
   ram.data[0x1014] = 0x00;  
@@ -173,7 +178,7 @@ void setup() {
   stack_reg.setInput(wb);
   stack_reg.setOutput1(adlb);
   stack_reg.setOutput2(rb);
- // stack_reg.setDefaultValue(0xFF);  // Goes top to bottom
+  stack_reg.setDefaultValue(0xFF);  // Goes top to bottom
   stack_reg.show_decimal = false;
   stack_reg.count_direction.setState(true); // Default to count down
   control_unit.connectComponentControlInput(CW_S_LOAD, stack_reg.load_enable);
@@ -317,6 +322,14 @@ void reset() {
   control_unit.reset();
   pcl.value = ram.data[0xFFFC];
   pch.value = ram.data[0xFFFD];
+  /* UPDATED CODE FOLLOWS - TO MOVE INSTRUCTION FETCH TO THE END OF EACH INSTRUCTION */
+  instruction_reg.value = ram.data[(pch.value * 256) + pcl.value];
+  control_unit.update(clock);
+  //pcl.value++;
+  //if(pcl.value > 255) {
+  //  pcl.value = 0;
+  //  pch.value++;
+  //}
 }
 
 void keyPressed() {
@@ -428,7 +441,7 @@ void draw() {
   
   // At the end of a clock half-cycle (phase), reset the buses so they are all "high impedence"
   // These will get set again during register, RAM and ALU updates if being driven
-  if(clock.currentState() == Clock.STATE_HL) {
+  if(clock.currentState() == Clock.STATE_FALLING) {
     for(Bus b : buses) {
       b.clearDriver();
     }

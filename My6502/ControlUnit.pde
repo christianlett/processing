@@ -83,6 +83,11 @@ int CW_ALU_CIN = 62;
 int CW_ALU_ROTATE = 63;
 int CW_INT_BRK = 64;
 
+String micro_instruction_names[] = {"", "A_OUT", "X_OUT", "Y_OUT", "S_OUT(R)", "T_OUT", "P_OUT", "ALU_OUT", "", "PCH_OUT(ADH)", "ADH_OUT(ADH)", "PCH_OUT(R)", "PCL_OUT(R)", "ADH_00", "ADH_01", "ADH_FF", "", "PCL_OUT(ADL)", "ADL_OUT(ADL)", "", "S_OUT(ADL)", "INTVEC_HI", "INTVEC_LO",
+                                "", "", "A_LOAD", "X_LOAD", "Y_LOAD", "S_LOAD", "T_LOAD", "P_LOAD(ALL)", "IR_LOAD", "", "PCL_LOAD", "PCH_LOAD", "ADL_LOAD", "ADH_LOAD", "P_LOAD(WB)", "P_LOAD(ALU)", "P_LOAD(IR5)", "ALU_FORCE_CARRY", "", "DB_WB", "RB_WB", "RB_DB", "",
+                                "PC_INC", "ADL_INC", "S_COUNT", "ALU_X_A", "ALU_X_B", "ALU_Y_0", "ALU_Y_1", "ALU_Y_2", "ALU_Y_3", "P_LOAD(C)", "P_LOAD(Z)", "P_LOAD(I)", "P_LOAD(V)", "P_LOAD(N)", "INST_END(OBSOLETE)", "S_COUNT_DIR", "ALU_CIN", "ALU_ROT", "INT_BRK"};       
+//10000000100000001000000010000000100000000100001000000000000000000
+
 
 // Encoded Micro-Instruction Bitmasks
 // Bank 0.0 - Outputs 1 - R & W Buses - 3-bits
@@ -368,15 +373,19 @@ class ControlUnit {
   InstructionDef[] instructions;
   int[] instruction_rom;
   ControlWord control_word;
-  
-  String last_cw = "";
-  
+    
   int cur_inst_address;
   int cur_op_code;
   
   int phase;  // Internal clock phase register (1-bit flip-flop); 0 = PHI1; 1 = PHI2
   int step;   // Internal step register (4-bit counter); 0-7
   int inst_version; // Set by combinational logic for instructions that differ based on external factors
+  boolean inhibit_phase_flipflop;
+  
+  // DEBUG
+  String last_cw = "";
+  int last_clock = 0;
+  // END DEBUG
    
   // Instruction versions for instructions that differ based on external factors
   final static int VER0 = 0;
@@ -385,8 +394,8 @@ class ControlUnit {
   final static int VER3 = 3;
   
   // These are different definitions to those in Clock!
-  final static int PHI1 = 0;
-  final static int PHI2 = 1;
+  final static int INT_PHI1 = 0;
+  final static int INT_PHI2 = 1;
   
   ControlUnit(Register instruction_reg) {
     ir = instruction_reg;
@@ -416,6 +425,7 @@ class ControlUnit {
     phase = 0;
     step = 0;
     inst_version = VER0;
+    inhibit_phase_flipflop = false;
   }
   
   void connectComponentControlInput(int control_id, ControlBit input) {
@@ -481,7 +491,7 @@ class ControlUnit {
   //}
     // Branching - test for ---10000 (all branch operations)
     else if(compareBits(op_code, "---10000")) {
-      if(step == 1 && phase == PHI1) {
+      if(step == 1 && phase == INT_PHI1) {
         boolean bit_status = ((op_code & 0x20) == 0x20);
         if(compareBits(op_code, "00------")) {
           // Negative Flag
@@ -504,7 +514,7 @@ class ControlUnit {
             control_word.setBitState(CW_INST_END, true);
           }
         }
-      } else if(step == 2 && phase == PHI1) {
+      } else if(step == 2 && phase == INT_PHI1) {
         // Check for page transitions
         if(alu.c_out == true) {
           // Positive page transition if the ALU carry out has been set
@@ -565,13 +575,22 @@ class ControlUnit {
     
     // DEBUG - Print the control word to the console
     String cw = "";
+    String cw_set_bits = "";
     for(int i=0; i<control_word.word_length; i++) {
       cw += (control_word.bitEnabled(i)) ? "1" : "0";
+      if(control_word.bitEnabled(i)) {
+        if(micro_instruction_names[i] != "") {
+          cw_set_bits += micro_instruction_names[i] + ", ";
+        }
+      }
     }
     if(!cw.equals(last_cw)) {
       //println(cw);
+      println("Step " + step + " Phase " + (phase == INT_PHI2 ? "PHI2" : "PHI1"));
+      println("CW: " + cw_set_bits);
       last_cw = cw;
     }
+    // END DEBUG
     
     // If CW_S_OUT (Stack Pointer output to ADL) is active, also set the CW_ADH_01 control line
     if(control_word.bitEnabled(CW_S_OUT)) {
@@ -587,16 +606,27 @@ class ControlUnit {
       io_rw.setState(true);
     }
     
+    // DEBUG - Print the current clock state to the console
+    if(last_clock != c.currentState()) {
+      String clock_states[] = {"", "RISING", "HIGH", "FALLING", "LOW"};
+      println(clock_states[c.currentState()]);
+      last_clock = c.currentState();
+    }
+    // END DEBUG
+    
+    if(c.currentState() == Clock.STATE_RISING) {
+      if(phase == INT_PHI2 && control_word.bitEnabled(CW_IR_LOAD)) {
+        phase = INT_PHI1;
+        step = 0;
+        inst_version = VER0;
+        inhibit_phase_flipflop = true;
+      }
+    }
     // On the FALLING EDGE of the clock, flip-flop the internal phase register, and increment the count if required 
-    if(c.currentState() == Clock.STATE_HL) {
+    if(c.currentState() == Clock.STATE_FALLING) {
       // Step count on the falling edge of PHI-2
-      if(phase == PHI2) {
-        if(control_word.bitEnabled(CW_INST_END)) { 
-          step = 0;
-          inst_version = VER0;
-        } else {
-          step++;
-        }
+      if(phase == INT_PHI2) {
+        step++;
         if(step == 8) { 
           step = 0;
           inst_version = VER0;
@@ -604,9 +634,13 @@ class ControlUnit {
       }
       
       // Flip-flop phase
-      phase = 1 - phase;
-    //  println("Set up for step " + str(step) + (phase == 0 ? " (PHI-1)" : " (PHI-2)"));
+      if(!inhibit_phase_flipflop) {
+        phase = 1 - phase;
+      } else {
+        inhibit_phase_flipflop = false;
+      }
     }
+    
   }
   
   void display(float x, float y) {
@@ -623,12 +657,12 @@ class ControlUnit {
     fill(0);
     
     text(str(step), x + 100, y);
-    text((phase == PHI1) ? "PHI-1" : "PHI-2", x + 100, y + 20);
+    text((phase == INT_PHI1) ? "PHI-1" : "PHI-2", x + 100, y + 20);
     
     String inst = "FETCH";
-    if(step > 0) {
+ //   if(step > 0) {
       inst = instructions[ir.value].cuFormat();
-    }
+ //   }
     text(inst, x + 100, y + 40);
     
     text(inst_version, x + 100, y + 60);
