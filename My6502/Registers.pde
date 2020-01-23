@@ -53,7 +53,7 @@ class Register extends Component {
   void setOutput(Bus bus) {
     this.output_bus_1 = bus;
   }
-  //<>// //<>//
+  //<>// //<>// //<>// //<>//
    
   void update(Clock c) {
     if(output_enable_1.enabled()) {

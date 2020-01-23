@@ -126,10 +126,6 @@ class ALU extends Component {
     switch(y_oper) {
       case 0x0:
         return 0x0;
-      case 0x1:
-        // This is a special case, captured by logic prior to the multiplexers, which will force the input back to 0000 but set the SR (Shift Right) Enable line
-        sr_enable = true;
-        return 0x0;
       case 0x3:
         return 0xFF - b; // Just negating b using ~b returns the two's compliment, which messes up subtraction calculations later. e.g. b = 1; ~b = -2, not 254 as required for correct carry over 
       case 0x5:

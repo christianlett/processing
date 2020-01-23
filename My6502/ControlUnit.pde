@@ -70,12 +70,13 @@ int CW_ALU_Y_0 = 51;
 int CW_ALU_Y_1 = 52;
 int CW_ALU_Y_2 = 53;
 int CW_ALU_Y_3 = 54;
-int CW_P_C_LOAD = 55;
-int CW_P_Z_LOAD = 56;
-int CW_P_I_LOAD = 57;
-int CW_P_V_LOAD = 58;
-int CW_P_N_LOAD = 59;
-int CW_INST_END = 60;
+int CW_ALU_SR = 55;
+int CW_P_C_LOAD = 56;
+int CW_P_Z_LOAD = 57;
+int CW_P_I_LOAD = 58;
+int CW_P_V_LOAD = 59;
+int CW_P_N_LOAD = 60;
+//int CW_INST_END = 60;
 
 // Additional Control Word Signals from Random Control Logic
 int CW_S_COUNT_DIR = 61;
@@ -85,8 +86,7 @@ int CW_INT_BRK = 64;
 
 String micro_instruction_names[] = {"", "A_OUT", "X_OUT", "Y_OUT", "S_OUT(R)", "T_OUT", "P_OUT", "ALU_OUT", "", "PCH_OUT(ADH)", "ADH_OUT(ADH)", "PCH_OUT(R)", "PCL_OUT(R)", "ADH_00", "ADH_01", "ADH_FF", "", "PCL_OUT(ADL)", "ADL_OUT(ADL)", "", "S_OUT(ADL)", "INTVEC_HI", "INTVEC_LO",
                                 "", "", "A_LOAD", "X_LOAD", "Y_LOAD", "S_LOAD", "T_LOAD", "P_LOAD(ALL)", "IR_LOAD", "", "PCL_LOAD", "PCH_LOAD", "ADL_LOAD", "ADH_LOAD", "P_LOAD(WB)", "P_LOAD(ALU)", "P_LOAD(IR5)", "ALU_FORCE_CARRY", "", "DB_WB", "RB_WB", "RB_DB", "",
-                                "PC_INC", "ADL_INC", "S_COUNT", "ALU_X_A", "ALU_X_B", "ALU_Y_0", "ALU_Y_1", "ALU_Y_2", "ALU_Y_3", "P_LOAD(C)", "P_LOAD(Z)", "P_LOAD(I)", "P_LOAD(V)", "P_LOAD(N)", "INST_END(OBSOLETE)", "S_COUNT_DIR", "ALU_CIN", "ALU_ROT", "INT_BRK"};       
-//10000000100000001000000010000000100000000100001000000000000000000
+                                "PC_INC", "ADL_INC", "S_COUNT", "ALU_X_A", "ALU_X_B", "ALU_Y_0", "ALU_Y_1", "ALU_Y_2", "ALU_Y_3", "ALU_SR", "P_LOAD(C)", "P_LOAD(Z)", "P_LOAD(I)", "P_LOAD(V)", "P_LOAD(N)", "S_COUNT_DIR", "ALU_CIN", "ALU_ROT", "INT_BRK"};       
 
 
 // Encoded Micro-Instruction Bitmasks
@@ -155,16 +155,17 @@ int MI_ALU_Y_0 = 0x400000;
 int MI_ALU_Y_1 = 0x800000;
 int MI_ALU_Y_2 = 0x1000000;
 int MI_ALU_Y_3 = 0x2000000;
+int MI_ALU_SR  = 0x4000000;
 
 // Non-encoded Status Register Bit Loads
-int MI_P_C_LOAD = 0x4000000;
-int MI_P_Z_LOAD = 0x8000000;
-int MI_P_I_LOAD = 0x10000000;
-int MI_P_V_LOAD = 0x20000000;
-int MI_P_N_LOAD = 0x40000000;
+int MI_P_C_LOAD = 0x8000000;
+int MI_P_Z_LOAD = 0x10000000;
+int MI_P_I_LOAD = 0x20000000;
+int MI_P_V_LOAD = 0x40000000;
+int MI_P_N_LOAD = 0x80000000;
 
 
-int MI_INST_END = 0x80000000;
+//int MI_INST_END = ;
 
 
 
@@ -484,34 +485,30 @@ class ControlUnit {
       // Use the Status Register Carry value
       control_word.setBitState(CW_ALU_CIN, p.getC());
     } 
-  // ALU Carry In - tested positive for 11--1000 or 111--110 for INC operations
-  //else if(compareBits(op_code, "11--1000") || compareBits(op_code, "111--110")) {
-  //  // Use a value of 1
-  //  control_word.setBitState(CW_ALU_FORCE_CARRY, true);
-  //}
     // Branching - test for ---10000 (all branch operations)
     else if(compareBits(op_code, "---10000")) {
       if(step == 1 && phase == INT_PHI1) {
+        // Get IR5, which is bit 5 (starting from zero) of the current opcode from the IR
         boolean bit_status = ((op_code & 0x20) == 0x20);
         if(compareBits(op_code, "00------")) {
-          // Negative Flag
+          // Negative Flag - BPL, BMI
           if(p.getN() == bit_status) {
             inst_version = VER1; // Branch taken
           }
         } else if(compareBits(op_code, "01------")) {
-          // Overflow Flag
-          if(p.getV() != bit_status) {
-            control_word.setBitState(CW_INST_END, true);
+          // Overflow Flag - BVC, BVS
+          if(p.getV() == bit_status) {
+            inst_version = VER1; // Branch taken
           }
         } else if(compareBits(op_code, "10------")) {
-          // Carry Flag
-          if(p.getC() != bit_status) {
-            control_word.setBitState(CW_INST_END, true);
+          // Carry Flag - BCC, BCS
+          if(p.getC() == bit_status) {
+            inst_version = VER1; // Branch taken
           }
         } else if(compareBits(op_code, "11------")) {
-          // Zero Flag
-          if(p.getZ() != bit_status) {
-            control_word.setBitState(CW_INST_END, true);
+          // Zero Flag - BNE, BEQ
+          if(p.getZ() == bit_status) {
+            inst_version = VER1; // Branch taken
           }
         }
       } else if(step == 2 && phase == INT_PHI1) {
@@ -566,12 +563,12 @@ class ControlUnit {
     control_word.setBitState(CW_ALU_Y_1,  (cur_inst_word & 0x800000)   == 0x800000);
     control_word.setBitState(CW_ALU_Y_2,  (cur_inst_word & 0x1000000)  == 0x1000000);
     control_word.setBitState(CW_ALU_Y_3,  (cur_inst_word & 0x2000000)  == 0x2000000);
-    control_word.setBitState(CW_P_C_LOAD, (cur_inst_word & 0x4000000)  == 0x4000000);
-    control_word.setBitState(CW_P_Z_LOAD, (cur_inst_word & 0x8000000)  == 0x8000000);
-    control_word.setBitState(CW_P_I_LOAD, (cur_inst_word & 0x10000000) == 0x10000000);
-    control_word.setBitState(CW_P_V_LOAD, (cur_inst_word & 0x20000000) == 0x20000000);
-    control_word.setBitState(CW_P_N_LOAD, (cur_inst_word & 0x40000000) == 0x40000000);
-    control_word.setBitState(CW_INST_END, (cur_inst_word & 0x80000000) == 0x80000000);
+    control_word.setBitState(CW_ALU_SR,   (cur_inst_word & 0x4000000)  == 0x4000000);
+    control_word.setBitState(CW_P_C_LOAD, (cur_inst_word & 0x8000000)  == 0x8000000);
+    control_word.setBitState(CW_P_Z_LOAD, (cur_inst_word & 0x10000000) == 0x10000000);
+    control_word.setBitState(CW_P_I_LOAD, (cur_inst_word & 0x20000000) == 0x20000000);
+    control_word.setBitState(CW_P_V_LOAD, (cur_inst_word & 0x40000000) == 0x40000000);
+    control_word.setBitState(CW_P_N_LOAD, (cur_inst_word & 0x80000000) == 0x80000000);
     
     // DEBUG - Print the control word to the console
     String cw = "";
