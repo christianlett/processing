@@ -70,7 +70,7 @@ class ADLDriver extends BusDriver {
   void update() {
     value = 0xF8; // 11111000;
     value |= bool2int(int_vec_hi.enabled());  // Bit 0
-    value |= (bool2int(int_brk.enabled() | int_irq.enabled() | int_nmi.enabled()) << 1); // Bit 1
+    value |= (bool2int((int_brk.enabled() & !int_res.enabled()) | int_irq.enabled() | int_nmi.enabled()) << 1); // Bit 1
     value |= (bool2int(int_brk.enabled() | int_irq.enabled() | int_res.enabled()) << 2); // Bit 2
     
     if(int_vec_lo.enabled() || int_vec_hi.enabled()) {

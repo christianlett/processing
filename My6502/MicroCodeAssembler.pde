@@ -22,14 +22,6 @@ class MicroCodeAssembler {
   }
   
   void assemble() {
-    // Step 0 of all cu.instructions is the same
-    //for(int i=0; i<256; i++) {
-    //  loadInstructionROM(VER0, i, 0, PHI1, MI_PCL_OUT);
-    //  loadInstructionROM(VER0, i, 0, PHI1, MI_PCH_OUT);
-    //  loadInstructionROM(VER0, i, 0, PHI1, MI_IR_LOAD);
-    //  loadInstructionROM(VER0, i, 0, PHI2, MI_PC_INC);
-    //}
-    
     // ADC # (69) - NVZC - 2 cycles
     cu.instructions[0x69].set("ADC", InstructionDef.IMMEDIATE);
     loadInstructionROM(VER0, 0x69, 0, PHI1, MI_PC_INC);
@@ -410,6 +402,30 @@ class MicroCodeAssembler {
     loadInstructionROM(VER0, 0x00, 6, PHI2, MI_PCL_OUT);
     loadInstructionROM(VER0, 0x00, 6, PHI2, MI_PCH_OUT);
     loadInstructionROM(VER0, 0x00, 6, PHI2, MI_IR_LOAD);
+    
+    // Version 1 - RESET
+    loadInstructionROM(VER1, 0x00, 1, PHI2, MI_PCHR_OUT); // Push HB of PC
+    loadInstructionROM(VER1, 0x00, 1, PHI2, MI_S_OUT);
+    loadInstructionROM(VER1, 0x00, 2, PHI1, MI_S_COUNT);  // Count down
+    loadInstructionROM(VER1, 0x00, 2, PHI2, MI_PCLR_OUT); // Push LB of PC
+    loadInstructionROM(VER1, 0x00, 2, PHI2, MI_S_OUT);
+    loadInstructionROM(VER1, 0x00, 3, PHI1, MI_S_COUNT);  // Count down
+    loadInstructionROM(VER1, 0x00, 3, PHI2, MI_P_OUT);    // Push Status Register
+    loadInstructionROM(VER1, 0x00, 3, PHI2, MI_S_OUT);
+    loadInstructionROM(VER1, 0x00, 4, PHI1, MI_S_COUNT);  // Count down
+    loadInstructionROM(VER1, 0x00, 4, PHI2, MI_ADH_FF);
+    loadInstructionROM(VER1, 0x00, 4, PHI2, MI_INTVEC_LO);
+    loadInstructionROM(VER1, 0x00, 4, PHI2, MI_DB_WB);
+    loadInstructionROM(VER1, 0x00, 4, PHI2, MI_PCL_LOAD);
+    loadInstructionROM(VER1, 0x00, 5, PHI1, MI_ADH_FF);
+    loadInstructionROM(VER1, 0x00, 5, PHI1, MI_INTVEC_HI);
+    loadInstructionROM(VER1, 0x00, 5, PHI1, MI_DB_WB);
+    loadInstructionROM(VER1, 0x00, 5, PHI1, MI_PCH_LOAD);
+    loadInstructionROM(VER1, 0x00, 5, PHI2, MI_P_I_LOAD);  // Sets the interrupt disable flag
+    loadInstructionROM(VER1, 0x00, 5, PHI2, MI_P_FROM_ALU);
+    loadInstructionROM(VER1, 0x00, 6, PHI2, MI_PCL_OUT);
+    loadInstructionROM(VER1, 0x00, 6, PHI2, MI_PCH_OUT);
+    loadInstructionROM(VER1, 0x00, 6, PHI2, MI_IR_LOAD);
     
     // CLC (18) - C=0
     cu.instructions[0x18].set("CLC", InstructionDef.IMPLIED);

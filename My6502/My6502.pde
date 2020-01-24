@@ -320,11 +320,15 @@ void reset() {
     r.reset();
   }
   control_unit.reset();
-  pcl.value = ram.data[0xFFFC];
-  pch.value = ram.data[0xFFFD];
+  instruction_reg.value = 0x00;  // Force BRK for reset
+  io_res.setState(true);
+  control_unit.inst_version = ControlUnit.VER1; // Force RESET version
+  
+  //pcl.value = ram.data[0xFFFC];
+  //pch.value = ram.data[0xFFFD];
   /* UPDATED CODE FOLLOWS - TO MOVE INSTRUCTION FETCH TO THE END OF EACH INSTRUCTION */
-  instruction_reg.value = ram.data[(pch.value * 256) + pcl.value];
-  control_unit.update(clock);
+  //instruction_reg.value = ram.data[(pch.value * 256) + pcl.value];
+  //control_unit.update(clock);
   //pcl.value++;
   //if(pcl.value > 255) {
   //  pcl.value = 0;
