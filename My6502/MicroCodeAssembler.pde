@@ -374,6 +374,7 @@ class MicroCodeAssembler {
     }
     
     // BRK (00) - 7 cycles
+    // Version 0 - BRK Software interrupt and IRQ Hardware interrupt
     cu.instructions[0x00].set("BRK", InstructionDef.DUMMY);
     loadInstructionROM(VER0, 0x00, 0, PHI1, MI_PC_INC);
     loadInstructionROM(VER0, 0x00, 1, PHI1, MI_PC_INC);
@@ -397,7 +398,7 @@ class MicroCodeAssembler {
     loadInstructionROM(VER0, 0x00, 5, PHI1, MI_INTVEC_HI);
     loadInstructionROM(VER0, 0x00, 5, PHI1, MI_DB_WB);
     loadInstructionROM(VER0, 0x00, 5, PHI1, MI_PCH_LOAD);
-    loadInstructionROM(VER0, 0x00, 5, PHI2, MI_P_I_LOAD);  // Sets the interrupt disable flag
+    loadInstructionROM(VER0, 0x00, 5, PHI2, MI_P_I_LOAD);  // Sets the interrupt disable flag (for software interrupts, the B bit will also be set here)
     loadInstructionROM(VER0, 0x00, 5, PHI2, MI_P_FROM_ALU);
     loadInstructionROM(VER0, 0x00, 6, PHI2, MI_PCL_OUT);
     loadInstructionROM(VER0, 0x00, 6, PHI2, MI_PCH_OUT);
@@ -421,11 +422,40 @@ class MicroCodeAssembler {
     loadInstructionROM(VER1, 0x00, 5, PHI1, MI_INTVEC_HI);
     loadInstructionROM(VER1, 0x00, 5, PHI1, MI_DB_WB);
     loadInstructionROM(VER1, 0x00, 5, PHI1, MI_PCH_LOAD);
-    loadInstructionROM(VER1, 0x00, 5, PHI2, MI_P_I_LOAD);  // Sets the interrupt disable flag
-    loadInstructionROM(VER1, 0x00, 5, PHI2, MI_P_FROM_ALU);
+   // loadInstructionROM(VER1, 0x00, 5, PHI2, MI_P_I_LOAD);  // Sets the interrupt disable flag
+  //  loadInstructionROM(VER1, 0x00, 5, PHI2, MI_P_FROM_ALU);
     loadInstructionROM(VER1, 0x00, 6, PHI2, MI_PCL_OUT);
     loadInstructionROM(VER1, 0x00, 6, PHI2, MI_PCH_OUT);
     loadInstructionROM(VER1, 0x00, 6, PHI2, MI_IR_LOAD);
+    
+    // Version 2 - NMI
+    loadInstructionROM(VER2, 0x00, 0, PHI1, MI_PC_INC);
+    loadInstructionROM(VER2, 0x00, 1, PHI1, MI_PC_INC);
+    loadInstructionROM(VER2, 0x00, 1, PHI2, MI_PCHR_OUT); // Push HB of PC
+    loadInstructionROM(VER2, 0x00, 1, PHI2, MI_S_OUT);
+    loadInstructionROM(VER2, 0x00, 1, PHI2, MI_RB_DB);
+    loadInstructionROM(VER2, 0x00, 2, PHI1, MI_S_COUNT);  // Count down
+    loadInstructionROM(VER2, 0x00, 2, PHI2, MI_PCLR_OUT); // Push LB of PC
+    loadInstructionROM(VER2, 0x00, 2, PHI2, MI_S_OUT);
+    loadInstructionROM(VER2, 0x00, 2, PHI2, MI_RB_DB);
+    loadInstructionROM(VER2, 0x00, 3, PHI1, MI_S_COUNT);  // Count down
+    loadInstructionROM(VER2, 0x00, 3, PHI2, MI_P_OUT);    // Push Status Register
+    loadInstructionROM(VER2, 0x00, 3, PHI2, MI_S_OUT);
+    loadInstructionROM(VER2, 0x00, 3, PHI2, MI_RB_DB);
+    loadInstructionROM(VER2, 0x00, 4, PHI1, MI_S_COUNT);  // Count down
+    loadInstructionROM(VER2, 0x00, 4, PHI2, MI_ADH_FF);
+    loadInstructionROM(VER2, 0x00, 4, PHI2, MI_INTVEC_LO);
+    loadInstructionROM(VER2, 0x00, 4, PHI2, MI_DB_WB);
+    loadInstructionROM(VER2, 0x00, 4, PHI2, MI_PCL_LOAD);
+    loadInstructionROM(VER2, 0x00, 5, PHI1, MI_ADH_FF);
+    loadInstructionROM(VER2, 0x00, 5, PHI1, MI_INTVEC_HI);
+    loadInstructionROM(VER2, 0x00, 5, PHI1, MI_DB_WB);
+    loadInstructionROM(VER2, 0x00, 5, PHI1, MI_PCH_LOAD);
+    loadInstructionROM(VER2, 0x00, 5, PHI2, MI_P_I_LOAD);  // Sets the interrupt disable flag (for software interrupts, the B bit will also be set here)
+    loadInstructionROM(VER2, 0x00, 5, PHI2, MI_P_FROM_ALU);
+    loadInstructionROM(VER2, 0x00, 6, PHI2, MI_PCL_OUT);
+    loadInstructionROM(VER2, 0x00, 6, PHI2, MI_PCH_OUT);
+    loadInstructionROM(VER2, 0x00, 6, PHI2, MI_IR_LOAD);
     
     // CLC (18) - C=0
     cu.instructions[0x18].set("CLC", InstructionDef.IMPLIED);

@@ -381,7 +381,7 @@ class ControlUnit {
   int phase;  // Internal clock phase register (1-bit flip-flop); 0 = PHI1; 1 = PHI2
   int step;   // Internal step register (4-bit counter); 0-7
   int inst_version; // Set by combinational logic for instructions that differ based on external factors
-  boolean inhibit_phase_flipflop;
+  boolean instruction_complete;
   
   // DEBUG
   String last_cw = "";
@@ -417,6 +417,9 @@ class ControlUnit {
     avengers.assemble();
     
     reset();
+    
+    // Override this to ensure reset happens on "power up"
+    instruction_complete = true;
   }
   
   void reset() {
@@ -426,7 +429,7 @@ class ControlUnit {
     phase = 0;
     step = 0;
     inst_version = VER0;
-    inhibit_phase_flipflop = false;
+    instruction_complete = false;
   }
   
   void connectComponentControlInput(int control_id, ControlBit input) {
@@ -459,6 +462,10 @@ class ControlUnit {
     return true;
   }
   
+  boolean instructionComplete() {
+    return instruction_complete;
+  }
+  
   
   void update(Clock c) {
     // Set the control-word bits for the current phase
@@ -477,8 +484,12 @@ class ControlUnit {
     // Run the opcode through the combinational logic circuit first
     // BRK
     if(compareBits(op_code, "00000000")) {
-      control_word.setBitState(CW_INT_BRK, true);
-      control_word.setBitState(CW_S_COUNT_DIR, true); // Count down
+      // Set the internal BRK control bit to true only if triggered by an explicit BRK instruction (i.e. ignore hardware interrupts)
+      if(!io_irq.enabled() && !io_nmi.enabled() && !io_res.enabled()) {
+        control_word.setBitState(CW_INT_BRK, true);
+      }
+      // We're pushing to the stack so always count down
+      control_word.setBitState(CW_S_COUNT_DIR, true);
     }
     // ADC and SBC - test for 011---01 or 111---01
     else if(compareBits(op_code, "-11---01")) {
@@ -582,9 +593,8 @@ class ControlUnit {
       }
     }
     if(!cw.equals(last_cw)) {
-      //println(cw);
-      println("Step " + step + " Phase " + (phase == INT_PHI2 ? "PHI2" : "PHI1"));
-      println("CW: " + cw_set_bits);
+      println("STEP: " + step + "; PHASE: " + (phase == INT_PHI2 ? "PHI2" : "PHI1") + "; CW: " + cw_set_bits);
+ 
       last_cw = cw;
     }
     // END DEBUG
@@ -604,11 +614,11 @@ class ControlUnit {
     }
     
     // DEBUG - Print the current clock state to the console
-    if(last_clock != c.currentState()) {
-      String clock_states[] = {"", "RISING", "HIGH", "FALLING", "LOW"};
-      println(clock_states[c.currentState()]);
-      last_clock = c.currentState();
-    }
+    //if(last_clock != c.currentState()) {
+    //  String clock_states[] = {"", "RISING", "HIGH", "FALLING", "LOW"};
+    //  println(clock_states[c.currentState()]);
+    //  last_clock = c.currentState();
+    //}
     // END DEBUG
     
     if(c.currentState() == Clock.STATE_RISING) {
@@ -616,7 +626,7 @@ class ControlUnit {
         phase = INT_PHI1;
         step = 0;
         inst_version = VER0;
-        inhibit_phase_flipflop = true;
+        instruction_complete = true;
       }
     }
     // On the FALLING EDGE of the clock, flip-flop the internal phase register, and increment the count if required 
@@ -631,10 +641,10 @@ class ControlUnit {
       }
       
       // Flip-flop phase
-      if(!inhibit_phase_flipflop) {
+      if(!instruction_complete) {
         phase = 1 - phase;
       } else {
-        inhibit_phase_flipflop = false;
+        instruction_complete = false;
       }
     }
     

@@ -48,7 +48,7 @@ ADLDriver adl_driver;
 // External IO Pins
 IOPin io_irq, io_nmi, io_res, io_rw;
 
-ControlBit ir_brk; // BRK instruction
+//ControlBit ir_brk; // BRK instruction
 
 //Screen screen;
 
@@ -102,7 +102,7 @@ void setup() {
   
   // TEST PROGRAMS BEGIN
   // 01 - Fibonacci Sequence
-  ram.data[0x1000] = 0xA9;  // LDA # (A9);
+  ram.data[0x1000] = 0x00;  // LDA # (A9);
   ram.data[0x1001] = 0x00;
   //ram.data[0x1002] = 0xA9;  // LDA # (A9);
   //ram.data[0x1003] = 0x10;
@@ -148,7 +148,7 @@ void setup() {
   io_res = new IOPin("RES", true);
   io_rw = new IOPin("READ", "WRITE");
   
-  ir_brk = new ControlBit();
+  //ir_brk = new ControlBit();
   
   // Control Unit
   control_unit = new ControlUnit(instruction_reg);
@@ -164,7 +164,7 @@ void setup() {
   
   adl_driver = new ADLDriver(io_irq, io_nmi, io_res);
   adl_driver.setOutput(adlb);
-  control_unit.connectComponentControlInput(CW_INT_BRK, adl_driver.int_brk);
+  //control_unit.connectComponentControlInput(CW_INT_BRK, adl_driver.int_brk);
   control_unit.connectComponentControlInput(CW_INTVEC_LO, adl_driver.int_vec_lo);
   control_unit.connectComponentControlInput(CW_INTVEC_HI, adl_driver.int_vec_hi);
  
@@ -316,24 +316,38 @@ void setup() {
 }
 
 void reset() {
-  for(Register r : registers) {
-    r.reset();
-  }
-  control_unit.reset();
-  instruction_reg.value = 0x00;  // Force BRK for reset
-  io_res.setState(true);
-  control_unit.inst_version = ControlUnit.VER1; // Force RESET version
-  
-  //pcl.value = ram.data[0xFFFC];
-  //pch.value = ram.data[0xFFFD];
-  /* UPDATED CODE FOLLOWS - TO MOVE INSTRUCTION FETCH TO THE END OF EACH INSTRUCTION */
-  //instruction_reg.value = ram.data[(pch.value * 256) + pcl.value];
-  //control_unit.update(clock);
-  //pcl.value++;
-  //if(pcl.value > 255) {
-  //  pcl.value = 0;
-  //  pch.value++;
+  //for(Register r : registers) {
+  //  r.reset();
   //}
+  control_unit.reset();
+  io_res.setState(true);
+  
+  
+}
+
+void hardwareInterrupt() {
+  if(io_res.enabled()) {
+    if(control_unit.instructionComplete()) {
+      instruction_reg.value = 0x00;  // Force BRK for reset
+      control_unit.inst_version = ControlUnit.VER1; // Force RESET version
+      return;
+    }
+  }
+  if(io_irq.enabled()) {
+    // IRQ waits for the current instruction to complete, and relies on the P.I flag to be off
+    if(control_unit.instructionComplete() && (stat.value & 0x04) != 0x04) {
+      instruction_reg.value = 0x00;  // Force BRK for reset
+      control_unit.inst_version = ControlUnit.VER0; // Force standard BRK/IRQ version
+      return;
+    }
+  }
+  if(io_nmi.enabled()) {
+    //if(control_unit.instructionComplete()) {
+      instruction_reg.value = 0x00;  // Force BRK for reset
+      control_unit.inst_version = ControlUnit.VER2; // Force NMI version
+      return;
+   // }
+  }
 }
 
 void keyPressed() {
@@ -346,7 +360,8 @@ void keyPressed() {
   } else if(key == 'd' || key == 'D') {
     show_disassembly = !show_disassembly;
   } else if(key == 'R') {
-    reset();
+    // Hardware reset
+    io_res.toggleState();
   } else if(key == 'i' || key == 'I') {
     // IRQ
     io_irq.toggleState();

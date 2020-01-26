@@ -261,10 +261,17 @@ class StatusRegister extends Register {
   }
    
   void reset() {
-    this.value = 0x30;
+    this.value = 0;
   }
   
   void update(Clock c) {
+    // Set the B and "unused" bits 
+    value |= 0x20;  // Bit 5 is always set
+    value &= 0xEF;  // Clear the B bit (bit 4)
+    if(!io_irq.enabled() && !io_nmi.enabled()) {
+      value |= 0x10;
+    }
+    
     super.update(c);
 
     if(c.currentState() != Clock.STATE_RISING) return;
@@ -303,7 +310,7 @@ class StatusRegister extends Register {
       if(load_n.enabled()) {
         setBit(7, (input_bus_value & 0x80) == 0x80);
       }
-      // A unique case - sets the interrupt-disable flag for IRQ and BRK interrupts
+      // A unique case - sets the interrupt-disable flag for IRQ and BRK interrupts, and bit 4 (B) for BRK only
       if(load_i.enabled()) {
         setBit(2, true);
       }
