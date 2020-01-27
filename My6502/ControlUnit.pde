@@ -627,6 +627,7 @@ class ControlUnit {
         step = 0;
         inst_version = VER0;
         instruction_complete = true;
+       // io_res.setState(false);  // Turn off the reset signal
       }
     }
     // On the FALLING EDGE of the clock, flip-flop the internal phase register, and increment the count if required 

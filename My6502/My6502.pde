@@ -48,6 +48,9 @@ ADLDriver adl_driver;
 // External IO Pins
 IOPin io_irq, io_nmi, io_res, io_rw;
 
+// Hardware interrupts
+HardwareInterrupt res, irq, nmi;
+
 //ControlBit ir_brk; // BRK instruction
 
 //Screen screen;
@@ -91,9 +94,9 @@ void setup() {
   ram.address_bus_high = adhb;
    
  
-  // Set reset vector - currently to $1000
+  // Set reset vector - currently to $3000
   ram.data[0xFFFC] = 0x00;
-  ram.data[0xFFFD] = 0x10;
+  ram.data[0xFFFD] = 0x30;
   
   // BRK/IRQ vector
   ram.data[0xFFFE] = 0x50;
@@ -101,8 +104,16 @@ void setup() {
   
   
   // TEST PROGRAMS BEGIN
+  // 00 - Reset Sequence
+  ram.data[0x3000] = 0xA2;  // LDX
+  ram.data[0x3001] = 0xFF;
+  ram.data[0x3002] = 0x9A;  // TXS
+  ram.data[0x3003] = 0x4C;  // JMP
+  ram.data[0x3004] = 0x00;
+  ram.data[0x3005] = 0x10;  // Jump to program at 0x1000
+  
   // 01 - Fibonacci Sequence
-  ram.data[0x1000] = 0x00;  // LDA # (A9);
+  ram.data[0x1000] = 0xA9;  // LDA # (A9);
   ram.data[0x1001] = 0x00;
   //ram.data[0x1002] = 0xA9;  // LDA # (A9);
   //ram.data[0x1003] = 0x10;
@@ -147,6 +158,12 @@ void setup() {
   io_nmi = new IOPin("NMI", true);
   io_res = new IOPin("RES", true);
   io_rw = new IOPin("READ", "WRITE");
+  
+  
+  
+  res = new HardwareInterrupt("RESET", io_res, true, HardwareInterrupt.LEVEL_TRIGGERED, 1);
+  irq = new HardwareInterrupt("IRQ", io_irq, true, HardwareInterrupt.LEVEL_TRIGGERED, 0);
+  nmi = new HardwareInterrupt("NMI", io_nmi, false, HardwareInterrupt.EDGE_TRIGGERED, 2);
   
   //ir_brk = new ControlBit();
   
@@ -312,17 +329,7 @@ void setup() {
   
   //screen = new Screen();
   
-  reset();
-}
-
-void reset() {
-  //for(Register r : registers) {
-  //  r.reset();
-  //}
-  control_unit.reset();
   io_res.setState(true);
-  
-  
 }
 
 void hardwareInterrupt() {
@@ -335,6 +342,7 @@ void hardwareInterrupt() {
   }
   if(io_irq.enabled()) {
     // IRQ waits for the current instruction to complete, and relies on the P.I flag to be off
+    println(stat.value & 0x04);
     if(control_unit.instructionComplete() && (stat.value & 0x04) != 0x04) {
       instruction_reg.value = 0x00;  // Force BRK for reset
       control_unit.inst_version = ControlUnit.VER0; // Force standard BRK/IRQ version
@@ -473,6 +481,10 @@ void draw() {
   // 4) ALU
   // 5) RAM
   // 6) Buffers
+  nmi.update(control_unit.instructionComplete(), false);
+  irq.update(control_unit.instructionComplete(), (stat.value & 0x04) == 0x04);
+  res.update(control_unit.instructionComplete(), (stat.value & 0x04) == 0x04);
+  
   control_unit.update(clock);
   
   for(Register r : registers) {
